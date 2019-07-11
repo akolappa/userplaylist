@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ArticleSearchServiceImpl implements ArticleSearchService {
@@ -16,6 +17,6 @@ public class ArticleSearchServiceImpl implements ArticleSearchService {
 
     @Override
     public List<ArticlePojo> searchArticleFromExternalService(String searchQuery) {
-        contentSearchConnector.searchWithKeywords(searchQuery);
+        return (List<ArticlePojo>)contentSearchConnector.searchWithKeywords(searchQuery).get();
     }
 }

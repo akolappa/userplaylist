@@ -19,11 +19,11 @@ public class ContentSearchConnector {
 
     //TODO : expose the below values in the application property
     private String resourcePath = "search";
-    private String host = "staging-gateway.mondiamedia.com  ";
+    private String host = "staging-gateway.mondiamedia.com";
     private String protocol = "https";
     private String apiVersion = "v1";
-    private String basePath = "api/content";
-    private String authorization = "Bearer C8a5e6dde-2d2e-4ecf-a74c-e478825db7b3";
+    private String basePath = "/api/content/";
+    private String authorization = "Bearer C320bd128-5398-4edd-b24f-bf268740a1c9";
     private String gateWaykey = "G7947bedc-32d0-53fa-5e41-d9eac5316ac4";
 
     private static final String GATEWAYKEY = "X-MM-GATEWAY-KEY";
@@ -31,10 +31,10 @@ public class ContentSearchConnector {
     @Autowired
     private RestTemplateBuilder restTemplate;
 
-    public void searchWithKeywords(String query){
+    public Optional<List> searchWithKeywords(String query){
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.add("q",query);
-        performRequest(HttpMethod.GET, buildConnectorUrl(queryParams),getRequestEntity(),
+        return performRequest(HttpMethod.GET, buildConnectorUrl(queryParams),getRequestEntity(),
                 List.class);
     }
 
