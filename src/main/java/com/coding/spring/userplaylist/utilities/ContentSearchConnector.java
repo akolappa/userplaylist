@@ -27,7 +27,7 @@ public class ContentSearchConnector {
     private String protocol = "https";
     private String apiVersion = "v1";
     private String basePath = "/api/content/";
-    private String authorization = "Bearer Cc56cad42-0464-4e15-af88-b31e86c83e7b";
+    private String authorization = "Bearer C1343a7d1-b598-44eb-86fd-5fd69fda0516";
     private String gateWaykey = "G7947bedc-32d0-53fa-5e41-d9eac5316ac4";
 
     private static final String GATEWAYKEY = "X-MM-GATEWAY-KEY";

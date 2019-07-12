@@ -47,7 +47,7 @@ public class ArticlePlaylistServiceImpl implements ArticlePlaylistService {
     public List<ArticlePojo> getArticlesInUserPlaylist(Long playlistId) {
         List<String> articleIds = articlePlaylistRepo
                                     .findByPlaylistEntity_Id(playlistId)
-                                    .orElseThrow(IllegalArgumentException::new)
+                                    .orElseThrow(() -> new IllegalArgumentException("Empty Result From Api"))
                                     .stream()
                                     .map(e -> e.getArticleId())
                                     .collect(Collectors.toList());
