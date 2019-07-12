@@ -1,16 +1,19 @@
 package com.coding.spring.userplaylist.utilities;
 
-import com.coding.spring.userplaylist.pojos.ArticleSearchResult;
+import com.coding.spring.userplaylist.pojos.ArticlePojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,12 +21,13 @@ import java.util.Optional;
 public class ContentSearchConnector {
 
     //TODO : expose the below values in the application property
-    private String resourcePath = "search";
+    private String resourcePathSearch = "search";
+    private String resourcePathArticle = "article/";
     private String host = "staging-gateway.mondiamedia.com";
     private String protocol = "https";
     private String apiVersion = "v1";
     private String basePath = "/api/content/";
-    private String authorization = "Bearer C320bd128-5398-4edd-b24f-bf268740a1c9";
+    private String authorization = "Bearer Cc56cad42-0464-4e15-af88-b31e86c83e7b";
     private String gateWaykey = "G7947bedc-32d0-53fa-5e41-d9eac5316ac4";
 
     private static final String GATEWAYKEY = "X-MM-GATEWAY-KEY";
@@ -34,11 +38,23 @@ public class ContentSearchConnector {
     public Optional<List> searchWithKeywords(String query){
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.add("q",query);
-        return performRequest(HttpMethod.GET, buildConnectorUrl(queryParams),getRequestEntity(),
+        return performRequest(HttpMethod.GET, buildConnectorUrl(queryParams,resourcePathSearch),getRequestEntity(),
                 List.class);
     }
 
-    private String buildConnectorUrl(MultiValueMap<String, String> queryParams){
+    public List<ArticlePojo> getArticlesData(List<String> articleIds){
+
+        List<ArticlePojo> articleList = new ArrayList<>();
+        articleIds.forEach(e -> {
+            articleList.add(performRequest(HttpMethod.GET, buildConnectorUrl(null,resourcePathArticle+e),
+                    getRequestEntity(),
+                    ArticlePojo.class)
+                    .orElseThrow(() -> new IllegalArgumentException()));
+        });
+        return articleList;
+    }
+
+    private String buildConnectorUrl(MultiValueMap<String, String> queryParams, String resourcePath){
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance()
                 .scheme(protocol)
@@ -46,8 +62,9 @@ public class ContentSearchConnector {
                 .path(apiVersion)
                 .path(basePath)
                 .path(resourcePath);
-
-        uriBuilder.queryParams(queryParams);
+        if(queryParams!=null && !queryParams.isEmpty()) {
+            uriBuilder.queryParams(queryParams);
+        }
         return uriBuilder.toUriString();
     }
 
