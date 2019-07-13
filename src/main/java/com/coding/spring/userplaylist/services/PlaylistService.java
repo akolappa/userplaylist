@@ -9,7 +9,7 @@ public interface PlaylistService {
 
     Boolean createPlaylist(PlaylistEntity playlistEntity);
     List<PlaylistEntity> getAllPlaylist();
-    Optional<PlaylistEntity> getPlayList(Long playlistId);
+    Optional<PlaylistEntity> getPlayList(Long playlistId, String userId);
     Optional<PlaylistEntity> getPlayList(String name, String userId);
     PlaylistEntity updatePlaylist(PlaylistEntity playlistEntity);
     void deletePlaylist(Long playlistId);

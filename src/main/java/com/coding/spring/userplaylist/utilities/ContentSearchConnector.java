@@ -1,5 +1,6 @@
 package com.coding.spring.userplaylist.utilities;
 
+import com.coding.spring.userplaylist.configs.ExternalApiConfig;
 import com.coding.spring.userplaylist.pojos.ArticlePojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,36 +21,30 @@ import java.util.Optional;
 @Service
 public class ContentSearchConnector {
 
-    //TODO : expose the below values in the application property
-    private String resourcePathSearch = "search";
-    private String resourcePathArticle = "article/";
-    private String host = "staging-gateway.mondiamedia.com";
-    private String protocol = "https";
-    private String apiVersion = "v1";
-    private String basePath = "/api/content/";
-    private String authorization = "Bearer C1343a7d1-b598-44eb-86fd-5fd69fda0516";
-    private String gateWaykey = "G7947bedc-32d0-53fa-5e41-d9eac5316ac4";
-
     private static final String GATEWAYKEY = "X-MM-GATEWAY-KEY";
+
+    @Autowired
+    private ExternalApiConfig apiConfig;
 
     @Autowired
     private RestTemplateBuilder restTemplate;
 
+    //calls the external search api with required parameters
     public Optional<List> searchWithKeywords(String query){
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.add("q",query);
-        return performRequest(HttpMethod.GET, buildConnectorUrl(queryParams,resourcePathSearch),getRequestEntity(),
+        return performRequest(HttpMethod.GET, buildConnectorUrl(queryParams,apiConfig.getResourcePathSearch()),getRequestEntity(),
                 List.class);
     }
-
+    //calls the external api for article data with required parameters
     public List<ArticlePojo> getArticlesData(List<String> articleIds){
 
         List<ArticlePojo> articleList = new ArrayList<>();
         articleIds.forEach(e -> {
-            articleList.add(performRequest(HttpMethod.GET, buildConnectorUrl(null,resourcePathArticle+e),
+            articleList.add(performRequest(HttpMethod.GET, buildConnectorUrl(null,apiConfig.getResourcePathArticle()+e),
                     getRequestEntity(),
                     ArticlePojo.class)
-                    .orElseThrow(() -> new IllegalArgumentException()));
+                    .orElseThrow(() -> new IllegalArgumentException("Empty/Error Response from Api")));
         });
         return articleList;
     }
@@ -57,10 +52,10 @@ public class ContentSearchConnector {
     private String buildConnectorUrl(MultiValueMap<String, String> queryParams, String resourcePath){
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .path(apiVersion)
-                .path(basePath)
+                .scheme(apiConfig.getProtocol())
+                .host(apiConfig.getHost())
+                .path(apiConfig.getApiVersion())
+                .path(apiConfig.getBasePath())
                 .path(resourcePath);
         if(queryParams!=null && !queryParams.isEmpty()) {
             uriBuilder.queryParams(queryParams);
@@ -71,8 +66,8 @@ public class ContentSearchConnector {
     private HttpEntity<String> getRequestEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        headers.add(HttpHeaders.AUTHORIZATION,authorization);
-        headers.add(GATEWAYKEY,gateWaykey);
+        headers.setBearerAuth(apiConfig.getAuthorization());
+        headers.add(GATEWAYKEY,apiConfig.getGateWaykey());
         return new HttpEntity<>(headers);
     }
 

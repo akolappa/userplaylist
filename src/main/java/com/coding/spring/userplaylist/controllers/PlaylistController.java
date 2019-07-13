@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/user/playlist")
+@RequestMapping("/users")
 public class PlaylistController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class PlaylistController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("/all")
+    @GetMapping("/{userId}/playlists/all")
     public ResponseEntity<List<PlaylistPojo>> getAllPlaylist(){
         return ResponseEntity.ok(playlistService.getAllPlaylist()
                 .stream()
@@ -31,18 +31,19 @@ public class PlaylistController {
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping("/{playlistId}")
-    public ResponseEntity<PlaylistPojo> getPlayList(@PathVariable Long playlistId){
+    @GetMapping("/{userId}/playlists/{playlistId}")
+    public ResponseEntity<PlaylistPojo> getPlayList(@PathVariable Long playlistId,
+                                                    @PathVariable String userId){
 
-        Optional<PlaylistEntity> response = playlistService.getPlayList(playlistId);
+        Optional<PlaylistEntity> response = playlistService.getPlayList(playlistId,userId);
         if (!response.isPresent()){
            return ResponseEntity.notFound().build();
         }
        return ResponseEntity.ok(convertToPojo(response.get()));
     }
 
-    @GetMapping
-    public ResponseEntity<PlaylistPojo> getPlayList(@RequestParam String playlistName, @RequestParam String userId){
+    @GetMapping("/{userId}/playlists")
+    public ResponseEntity<PlaylistPojo> getPlayList(@RequestParam String playlistName, @PathVariable String userId){
 
         Optional<PlaylistEntity> response = playlistService.getPlayList(playlistName, userId);
         if (!response.isPresent()){
@@ -51,7 +52,7 @@ public class PlaylistController {
        return ResponseEntity.ok(convertToPojo(response.get()));
     }
 
-    @PostMapping
+    @PostMapping("/playlists")
     public ResponseEntity<Boolean> createPlaylist(@RequestBody PlaylistPojo playlistPojo){
         if(!playlistService.createPlaylist(convertToEntity(playlistPojo))){
             return ResponseEntity.status(HttpStatus.FOUND).body(Boolean.FALSE);
@@ -59,9 +60,9 @@ public class PlaylistController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Boolean.TRUE);
     }
 
-    @PutMapping
+    @PutMapping("/playlists")
     public ResponseEntity<PlaylistPojo> updatePlaylist(@RequestBody PlaylistPojo playlistPojo){
-        if(!playlistService.getPlayList(playlistPojo.getId()).isPresent()){
+        if(!playlistService.getPlayList(playlistPojo.getId(),playlistPojo.getUserId()).isPresent()){
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(convertToPojo(
@@ -70,9 +71,10 @@ public class PlaylistController {
                     )));
     }
 
-    @DeleteMapping("/{playlistId}")
-    public ResponseEntity<Boolean> deletePlaylist(@PathVariable Long playlistId){
-        if(!playlistService.getPlayList(playlistId).isPresent()){
+    @DeleteMapping("/{userId}/playlists/{playlistId}")
+    public ResponseEntity<Boolean> deletePlaylist(@PathVariable Long playlistId,
+                                                  @PathVariable String userId){
+        if(!playlistService.getPlayList(playlistId,userId).isPresent()){
             return ResponseEntity.notFound().build();
         }
         playlistService.deletePlaylist(playlistId);

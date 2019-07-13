@@ -31,8 +31,8 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Override
-    public Optional<PlaylistEntity> getPlayList(Long playlistId) {
-        return playlistRepo.findById(playlistId);
+    public Optional<PlaylistEntity> getPlayList(Long playlistId, String userId) {
+        return playlistRepo.findByIdAndUserId(playlistId,userId);
     }
 
     @Override

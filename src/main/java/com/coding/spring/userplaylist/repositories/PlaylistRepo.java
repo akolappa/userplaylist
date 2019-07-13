@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface PlaylistRepo extends JpaRepository<PlaylistEntity, Long> {
 
-    Optional<PlaylistEntity> findByName(String name);
+    Optional<PlaylistEntity> findByIdAndUserId(Long id,String userId);
 
     Optional<PlaylistEntity> findByNameAndUserId(String name , String userId);
 

@@ -2,6 +2,7 @@ package com.coding.spring.userplaylist.controllers;
 
 import com.coding.spring.userplaylist.entities.ArticlePlaylistEntity;
 import com.coding.spring.userplaylist.entities.PlaylistEntity;
+import com.coding.spring.userplaylist.pojos.ArticlePlaylistPojo;
 import com.coding.spring.userplaylist.pojos.ArticlePojo;
 import com.coding.spring.userplaylist.services.ArticlePlaylistService;
 import com.coding.spring.userplaylist.services.PlaylistService;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/user/playlist/article")
+@RequestMapping("/users/{userId}/playlists/articles")
 public class ArticlePlaylistController {
 
     @Autowired
@@ -24,14 +25,24 @@ public class ArticlePlaylistController {
     private PlaylistService playlistService;
 
     @PostMapping
-    public ResponseEntity<Boolean> addArticleToPlaylist(@RequestBody ArticlePlaylistEntity articlePlaylistEntity){
+    public ResponseEntity<Boolean> addArticleToPlaylist(@RequestBody ArticlePlaylistPojo articlePlaylistPojo,
+                                                        @PathVariable String userId,
+                                                        @RequestParam String playlistName){
+
+        Optional<PlaylistEntity> result = playlistService.getPlayList(playlistName,userId);
+        if(!result.isPresent()){
+            return ResponseEntity.notFound().build();
+        }
+        ArticlePlaylistEntity articlePlaylistEntity = new ArticlePlaylistEntity();
+        articlePlaylistEntity.setPlaylistEntity(result.get());
+        articlePlaylistEntity.setArticleId(articlePlaylistPojo.getArticleId());
         articlePlaylistService.addArticleToPlayList(articlePlaylistEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(Boolean.TRUE);
     }
 
     @DeleteMapping("/{articleId}")
     public ResponseEntity<Boolean> removeArticleFromPlaylist(@PathVariable String articleId,
-                                                             @RequestParam String userId,
+                                                             @PathVariable String userId,
                                                              @RequestParam String playlistName){
 
         Optional<PlaylistEntity> result = playlistService.getPlayList(playlistName,userId);
@@ -46,7 +57,7 @@ public class ArticlePlaylistController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ArticlePojo>> getArticlesInPlaylist(@RequestParam String userId,
+    public ResponseEntity<List<ArticlePojo>> getArticlesInPlaylist(@PathVariable String userId,
                                                                    @RequestParam String playlistName){
         Optional<PlaylistEntity> result = playlistService.getPlayList(playlistName,userId);
         if(!result.isPresent()){
